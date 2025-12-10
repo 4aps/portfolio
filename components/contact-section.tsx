@@ -50,18 +50,35 @@ export default function ContactSection() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const newErrors = validateForm()
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  const newErrors = validateForm()
 
-    if (Object.keys(newErrors).length === 0) {
+  if (Object.keys(newErrors).length === 0) {
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+
+      if (!res.ok) {
+        console.error("Form submission failed:", await res.text())
+        return
+      }
+
+      // success UI
       setSubmitted(true)
       setFormData({ name: "", email: "", message: "" })
       setTimeout(() => setSubmitted(false), 5000)
-    } else {
-      setErrors(newErrors)
+
+    } catch (error) {
+      console.error("Network error:", error)
     }
+  } else {
+    setErrors(newErrors)
   }
+}
 
   return (
     <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
